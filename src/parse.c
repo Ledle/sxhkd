@@ -2421,12 +2421,17 @@ void parse_event(xcb_generic_event_t *evt, uint8_t event_type, xcb_keysym_t *key
 		xcb_key_press_event_t *e = (xcb_key_press_event_t *) evt;
 		xcb_keycode_t keycode = e->detail;
 		*modfield = e->state;
+		if(*modfield==192) *modfield=64;
 		*keysym = xcb_key_symbols_get_keysym(symbols, keycode, 0);
 		PRINTF("key press %u %u\n", keycode, *modfield);
 	} else if (event_type == XCB_KEY_RELEASE) {
 		xcb_key_release_event_t *e = (xcb_key_release_event_t *) evt;
 		xcb_keycode_t keycode = e->detail;
 		*modfield = e->state & ~modfield_from_keycode(keycode);
+		if(*modfield==192 || *modfield==128) {
+			*modfield=(e->state==192)?0:64;
+
+		}
 		*keysym = xcb_key_symbols_get_keysym(symbols, keycode, 0);
 		PRINTF("key release %u %u\n", keycode, *modfield);
 	} else if (event_type == XCB_BUTTON_PRESS) {
